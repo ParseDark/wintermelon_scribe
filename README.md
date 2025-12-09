@@ -95,13 +95,29 @@ python main.py
 
 ## 🔒 API 配置
 
-使用 SiliconFlow API 进行语音转录：
+使用 SiliconFlow API 进行语音转录，有以下三种配置方式：
+
+### 方式一：使用 .env 文件（推荐）
+
+1. 复制环境变量示例文件：
+```bash
+cp .env.example .env
+```
+
+2. 编辑 `.env` 文件，设置你的 API 密钥：
+```env
+SILICONFLOW_API_KEY=your-api-key-here
+```
+
+### 方式二：环境变量
 
 ```bash
 export SILICONFLOW_API_KEY="your-api-key-here"
 ```
 
-或在 `main.py` 中直接修改 `API_TOKEN` 变量。
+### 方式三：直接修改代码
+
+在 `main.py` 中直接修改 `API_TOKEN` 变量。
 
 ## ⚡ 性能指标
 

@@ -95,13 +95,29 @@ WinterMelon Scribe seamlessly integrates with:
 
 ## 🔒 API Configuration
 
-Using SiliconFlow API for speech transcription:
+Using SiliconFlow API for speech transcription with three configuration methods:
 
-1. Copy `.env.example` to `.env`
-2. Set your API key in `.env`:
+### Method 1: Using .env file (Recommended)
+
+1. Copy the environment variable example file:
+```bash
+cp .env.example .env
+```
+
+2. Edit `.env` file and set your API key:
 ```env
 SILICONFLOW_API_KEY=your-api-key-here
 ```
+
+### Method 2: Environment Variable
+
+```bash
+export SILICONFLOW_API_KEY="your-api-key-here"
+```
+
+### Method 3: Direct Code Modification
+
+Modify the `API_TOKEN` variable directly in `main.py`.
 
 ## ⚡ Performance Metrics
 
