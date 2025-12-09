@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/logo.jpg" alt="冬瓜速记 Logo" width="200">
+  <img src="https://cdn.jsdelivr.net/gh/ParseDark/wintermelon_scribe@main/assets/logo.jpg" alt="冬瓜速记 Logo" width="200">
 </div>
 
 # 冬瓜速记 (WinterMelon Scribe)
