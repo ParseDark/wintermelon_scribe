@@ -1,8 +1,4 @@
-<div align="center">
-  <img src="logo.jpg" alt="冬瓜速记 Logo" width="200">
-</div>
-
-# 冬瓜速记 (WinterMelon Scribe)
+# 🎙️ 冬瓜速记 (WinterMelon Scribe)
 
 [🇺🇸 English](README.en.md) | 🇨🇳 简体中文
 
