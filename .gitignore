@@ -3,3 +3,4 @@ venv
 .env
 *.wav
 temp_*
+__pycache__
