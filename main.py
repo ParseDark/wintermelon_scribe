@@ -12,12 +12,19 @@ from speech_transcription import create_transcription_manager
 
 load_dotenv()
 
-API_TOKEN = os.getenv("SILICONFLOW_API_KEY")
-MODEL = os.getenv("SILICONFLOW_MODEL", "FunAudioLLM/SenseVoiceSmall")
-SAMPLE_RATE = int(os.getenv("AUDIO_SAMPLE_RATE", "16000"))
+# 支持的提供商配置
+PROVIDER = os.getenv("TRANSCRIPTION_PROVIDER", "siliconflow").lower()
 
-# 创建语音转录管理器
-transcription_manager = create_transcription_manager("siliconflow", api_key=API_TOKEN, model=MODEL)
+if PROVIDER == "groq":
+    API_TOKEN = os.getenv("GROQ_API_KEY")
+    MODEL = os.getenv("GROQ_MODEL", "whisper-large-v3-turbo")
+    transcription_manager = create_transcription_manager("groq", api_key=API_TOKEN, model=MODEL)
+else:  # 默认使用 siliconflow
+    API_TOKEN = os.getenv("SILICONFLOW_API_KEY")
+    MODEL = os.getenv("SILICONFLOW_MODEL", "FunAudioLLM/SenseVoiceSmall")
+    transcription_manager = create_transcription_manager("siliconflow", api_key=API_TOKEN, model=MODEL)
+
+SAMPLE_RATE = int(os.getenv("AUDIO_SAMPLE_RATE", "16000"))
 
 recording = False
 audio_frames = []
@@ -304,7 +311,11 @@ def main():
     # 检查转录管理器配置
     if not transcription_manager.get_provider_info().get("configured", False):
         print("❌ 语音转录服务未配置")
-        print("请在 .env 文件中设置 SILICONFLOW_API_KEY")
+        provider_info = transcription_manager.get_provider_info()
+        if provider_info["name"] == "Groq":
+            print("请在 .env 文件中设置 GROQ_API_KEY")
+        else:  # SiliconFlow
+            print("请在 .env 文件中设置 SILICONFLOW_API_KEY")
         return
 
     print("=" * 50)

@@ -94,30 +94,50 @@ python main.py
 - [ ] **云同步**：跨设备同步设置和偏好
 
 ## 🔒 API 配置
+支持多个语音转录提供商，请根据需要选择配置：
 
-使用 SiliconFlow API 进行语音转录，有以下三种配置方式：
+### 支持的提供商
+- **SiliconFlow**（默认）：支持中文优化的 SenseVoice 模型
+- **Groq**：使用 Whisper Large V3 Turbo 模型
 
-### 方式一：使用 .env 文件（推荐）
-
+### SiliconFlow 配置（默认）
 1. 复制环境变量示例文件：
 ```bash
 cp .env.example .env
 ```
-
 2. 编辑 `.env` 文件，设置你的 API 密钥：
 ```env
 SILICONFLOW_API_KEY=your-api-key-here
+# 可选：指定模型
+SILICONFLOW_MODEL=FunAudioLLM/SenseVoiceSmall
 ```
 
-### 方式二：环境变量
+### Groq 配置
+1. 编辑 `.env` 文件，设置 Groq API 密钥：
+```env
+GROQ_API_KEY=your-groq-api-key-here
+# 可选：指定模型（默认为 whisper-large-v3-turbo）
+GROQ_MODEL=whisper-large-v3-turbo
+# 设置转录提供商为 Groq
+TRANSCRIPTION_PROVIDER=groq
+```
 
+### 环境变量配置方式
+
+#### SiliconFlow 环境变量
 ```bash
 export SILICONFLOW_API_KEY="your-api-key-here"
 ```
 
-### 方式三：直接修改代码
+#### Groq 环境变量
+```bash
+export GROQ_API_KEY="your-groq-api-key-here"
+export TRANSCRIPTION_PROVIDER=groq
+```
 
-在 `main.py` 中直接修改 `API_TOKEN` 变量。
+### 直接修改代码
+
+在 `main.py` 中直接修改配置变量。
 
 ## ⚡ 性能指标
 

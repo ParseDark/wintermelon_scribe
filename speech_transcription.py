@@ -146,7 +146,7 @@ def create_transcription_manager(provider_name: str = "siliconflow", **kwargs) -
     """创建转录管理器的工厂函数
     
     Args:
-        provider_name: 提供商名称，目前支持 "siliconflow"
+        provider_name: 提供商名称，支持 "siliconflow", "groq"
         **kwargs: 提供商配置参数
         
     Returns:
@@ -161,6 +161,12 @@ def create_transcription_manager(provider_name: str = "siliconflow", **kwargs) -
             )
         else:
             provider = SiliconFlowProvider()
+        return TranscriptionManager(provider)
+    elif provider_name.lower() == "groq":
+        provider = GroqProvider(
+            api_key=kwargs.get("api_key"),
+            model=kwargs.get("model", "whisper-large-v3-turbo")
+        )
         return TranscriptionManager(provider)
     else:
         raise ValueError(f"不支持的提供商: {provider_name}")
@@ -186,6 +192,72 @@ class OpenAIProvider(TranscriptionProvider):
         return {
             "name": "OpenAI",
             "model": self.model,
+            "configured": self.is_configured()
+        }
+
+
+class GroqProvider(TranscriptionProvider):
+    """Groq Whisper 提供商"""
+    
+    def __init__(self, api_key: str = None, model: str = "whisper-large-v3-turbo"):
+        self.api_url = "https://api.groq.com/openai/v1/audio/transcriptions"
+        self.api_key = api_key or os.getenv("GROQ_API_KEY")
+        self.model = model
+    
+    def transcribe(self, audio_path: str) -> tuple[str, float]:
+        """使用 Groq API 转录音频"""
+        if not self.is_configured():
+            raise ValueError("Groq API 未配置，请设置 GROQ_API_KEY")
+        
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+        }
+        
+        print("📝 转录中...")
+        start_time = time.time()
+        
+        try:
+            with open(audio_path, "rb") as audio_file:
+                files = {"file": audio_file}
+                data = {
+                    "model": self.model,
+                    "temperature": 0,
+                    "response_format": "verbose_json"
+                }
+                response = requests.post(self.api_url, headers=headers, files=files, data=data)
+            
+            inference_time = time.time() - start_time
+            response.raise_for_status()
+            
+            result = response.json()
+            text = result.get("text", "")
+            print(f"✅ 转录结果: {text}")
+            return text, inference_time
+            
+        except requests.exceptions.RequestException as e:
+            inference_time = time.time() - start_time
+            error_msg = f"API 请求失败: {e}"
+            print(f"❌ {error_msg}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"响应内容: {e.response.text}")
+            return "", inference_time
+        
+        except Exception as e:
+            inference_time = time.time() - start_time
+            error_msg = f"转录异常: {e}"
+            print(f"❌ {error_msg}")
+            return "", inference_time
+    
+    def is_configured(self) -> bool:
+        """检查 Groq 是否已配置"""
+        return bool(self.api_key)
+    
+    def get_info(self) -> Dict[str, Any]:
+        """获取提供商信息"""
+        return {
+            "name": "Groq",
+            "model": self.model,
+            "api_url": self.api_url,
             "configured": self.is_configured()
         }
 
