@@ -19,6 +19,18 @@ if PROVIDER == "groq":
     API_TOKEN = os.getenv("GROQ_API_KEY")
     MODEL = os.getenv("GROQ_MODEL", "whisper-large-v3-turbo")
     transcription_manager = create_transcription_manager("groq", api_key=API_TOKEN, model=MODEL)
+elif PROVIDER in ["aliyun", "aliyun_tingwu", "tingwu"]:
+    ACCESS_KEY_ID = os.getenv("ALIYUN_ACCESS_KEY_ID")
+    ACCESS_KEY_SECRET = os.getenv("ALIYUN_ACCESS_KEY_SECRET")
+    REGION_ID = os.getenv("ALIYUN_REGION_ID", "cn-beijing")
+    PROJECT_NAME = os.getenv("ALIYUN_TINGWU_PROJECT_NAME", "default")
+    transcription_manager = create_transcription_manager(
+        "aliyun_tingwu", 
+        access_key_id=ACCESS_KEY_ID,
+        access_key_secret=ACCESS_KEY_SECRET,
+        region_id=REGION_ID,
+        project_name=PROJECT_NAME
+    )
 else:  # 默认使用 siliconflow
     API_TOKEN = os.getenv("SILICONFLOW_API_KEY")
     MODEL = os.getenv("SILICONFLOW_MODEL", "FunAudioLLM/SenseVoiceSmall")

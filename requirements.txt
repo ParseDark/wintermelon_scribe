@@ -5,3 +5,6 @@ scipy
 pynput
 pyautogui
 python-dotenv
+aliyun-python-sdk-core>=2.14.0
+aliyun-python-sdk-tingwu<=1.0.7
+qiniu>=7.12.0

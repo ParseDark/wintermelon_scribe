@@ -97,8 +97,9 @@ python main.py
 支持多个语音转录提供商，请根据需要选择配置：
 
 ### 支持的提供商
-- **SiliconFlow**（默认）：支持中文优化的 SenseVoice 模型
-- **Groq**：使用 Whisper Large V3 Turbo 模型
+- **SiliconFlow**（默认）：支持中文优化的 SenseVoice 模型，推荐用于本地录音场景
+- **Groq**：使用 Whisper Large V3 Turbo 模型，快速响应
+- **阿里云听悟**：阿里云官方语音识别服务，支持高精度中文识别（需要OSS文件URL）
 
 ### SiliconFlow 配置（默认）
 1. 复制环境变量示例文件：
@@ -120,6 +121,49 @@ GROQ_API_KEY=your-groq-api-key-here
 GROQ_MODEL=whisper-large-v3-turbo
 # 设置转录提供商为 Groq
 TRANSCRIPTION_PROVIDER=groq
+```
+
+### 阿里云听悟配置
+1. 设置阿里云访问凭证（需要先在阿里云控制台创建 AccessKey）：
+```env
+ALIYUN_ACCESS_KEY_ID=your-access-key-id-here
+ALIYUN_ACCESS_KEY_SECRET=your-access-key-secret-here
+# 可选：指定区域（默认为 cn-beijing）
+ALIYUN_REGION_ID=cn-beijing
+# 可选：指定项目名称
+ALIYUN_TINGWU_PROJECT_NAME=default
+# 设置转录提供商为阿里云听悟
+TRANSCRIPTION_PROVIDER=aliyun_tingwu
+
+# 七牛云配置（用于自动上传本地音频文件）
+QINIU_ACCESS_KEY=your-qiniu-access-key-here
+QINIU_SECRET_KEY=your-qiniu-secret-key-here
+QINIU_BUCKET_NAME=your-bucket-name-here
+QINIU_DOMAIN=https://your-qiniu-domain.com
+```
+
+💡 **重要提示**：阿里云听悟需要音频文件的公网URL。我们已集成七牛云自动上传：
+- 🔄 **本地录音**：自动上传到七牛云 → 获取URL → 调用阿里云听悟
+- 🔗 **远程文件**：直接使用HTTP/HTTPS URL
+- ⚙️ **配置要求**：需要七牛云账户和存储空间配置
+
+2. 安装依赖（包含阿里云SDK和七牛云SDK）：
+```bash
+pip install aliyun-python-sdk-core aliyun-python-sdk-tingwu<=1.0.7
+```
+
+或者使用项目统一的依赖：
+```bash
+pip install -r requirements.txt
+# 包含：aliyun-python-sdk-core aliyun-python-sdk-tingwu qiniu
+```
+
+#### 阿里云听悟环境变量配置方式
+
+```bash
+export ALIYUN_ACCESS_KEY_ID="your-access-key-id-here"
+export ALIYUN_ACCESS_KEY_SECRET="your-access-key-secret-here"
+export TRANSCRIPTION_PROVIDER="aliyun_tingwu"
 ```
 
 ### 环境变量配置方式
