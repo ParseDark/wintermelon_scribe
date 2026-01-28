@@ -9,16 +9,6 @@ resolution-markers = [
 ]
 
 [[package]]
-name = "aliyun-python-sdk-core"
-version = "2.16.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "cryptography" },
-    { name = "jmespath" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/3e/09/da9f58eb38b4fdb97ba6523274fbf445ef6a06be64b433693da8307b4bec/aliyun-python-sdk-core-2.16.0.tar.gz", hash = "sha256:651caad597eb39d4fad6cf85133dffe92837d53bdf62db9d8f37dab6508bb8f9", size = 449555 }
-
-[[package]]
 name = "aliyun-python-sdk-tingwu"
 version = "1.0.7"
 source = { registry = "https://pypi.org/simple" }
