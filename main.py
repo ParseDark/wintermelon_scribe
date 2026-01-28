@@ -19,18 +19,7 @@ if PROVIDER == "groq":
     API_TOKEN = os.getenv("GROQ_API_KEY")
     MODEL = os.getenv("GROQ_MODEL", "whisper-large-v3-turbo")
     transcription_manager = create_transcription_manager("groq", api_key=API_TOKEN, model=MODEL)
-elif PROVIDER in ["aliyun", "aliyun_tingwu", "tingwu"]:
-    ACCESS_KEY_ID = os.getenv("ALIYUN_ACCESS_KEY_ID")
-    ACCESS_KEY_SECRET = os.getenv("ALIYUN_ACCESS_KEY_SECRET")
-    REGION_ID = os.getenv("ALIYUN_REGION_ID", "cn-beijing")
-    PROJECT_NAME = os.getenv("ALIYUN_TINGWU_PROJECT_NAME", "default")
-    transcription_manager = create_transcription_manager(
-        "aliyun_tingwu", 
-        access_key_id=ACCESS_KEY_ID,
-        access_key_secret=ACCESS_KEY_SECRET,
-        region_id=REGION_ID,
-        project_name=PROJECT_NAME
-    )
+
 else:  # 默认使用 siliconflow
     API_TOKEN = os.getenv("SILICONFLOW_API_KEY")
     MODEL = os.getenv("SILICONFLOW_MODEL", "FunAudioLLM/SenseVoiceSmall")
@@ -42,7 +31,7 @@ recording = False
 audio_frames = []
 stream = None
 start_time = None
-cmd_semicolon_pressed = False
+ctrl_slash_pressed = False
 pressed_keys = set()
 
 
@@ -229,14 +218,14 @@ def audio_callback(indata, frames, time_info, status):
 
 
 def on_key_press(key):
-    global cmd_semicolon_pressed, pressed_keys, paste_mode
+    global ctrl_slash_pressed, pressed_keys, paste_mode
 
     pressed_keys.add(key)
 
     try:
-        if key == keyboard.KeyCode.from_char(';') and keyboard.Key.cmd in pressed_keys:
-            if not cmd_semicolon_pressed and not recording:
-                cmd_semicolon_pressed = True
+        if key == keyboard.KeyCode.from_char('/') and keyboard.Key.ctrl in pressed_keys:
+            if not ctrl_slash_pressed and not recording:
+                ctrl_slash_pressed = True
                 paste_mode = "clipboard"
                 start_recording()
     except AttributeError:
@@ -244,14 +233,14 @@ def on_key_press(key):
 
 
 def on_key_release(key):
-    global cmd_semicolon_pressed, pressed_keys
+    global ctrl_slash_pressed, pressed_keys
 
     pressed_keys.discard(key)
 
     try:
-        if key == keyboard.KeyCode.from_char(';'):
-            if cmd_semicolon_pressed and recording:
-                cmd_semicolon_pressed = False
+        if key == keyboard.KeyCode.from_char('/'):
+            if ctrl_slash_pressed and recording:
+                ctrl_slash_pressed = False
                 audio_path, record_time = stop_recording()
 
                 if audio_path:
@@ -339,8 +328,7 @@ def main():
     print(f"🤖 使用模型: {provider_info['model']}")
     print()
     print("快捷键说明：")
-    print("• Cmd + ; : 复制到剪贴板")
-    print("• Option (Alt) + ; : 直接粘贴到光标位置")
+    print("• Ctrl + / : 复制到剪贴板")
     print()
     print("使用方法：")
     print("1. 按住相应快捷键开始录音")
