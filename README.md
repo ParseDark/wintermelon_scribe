@@ -84,6 +84,57 @@ python main.py
 - **Obsidian/Notion**：笔记系统
 - **iA Writer/Ulysses**：专业写作
 
+## 🧠 LLM 增强功能
+
+v3.0 新增 LLM 文本处理功能，支持在语音转文本后进行智能处理。
+
+### 快捷键
+- **Ctrl + /**：开始录音，自动根据配置处理并粘贴
+
+### 支持的 LLM 提供商
+- OpenAI (GPT-3.5, GPT-4, GPT-4-turbo 等)
+
+### 处理模式
+- `improve`：改进文本表达（默认）
+- `summarize`：总结要点
+- `correct`：纠正语法错误
+- `format_code`：格式化代码
+- `translate_en`：翻译为英文
+- `translate_zh`：翻译为中文
+- `meeting_notes`：整理会议纪要
+- `todo_list`：转换为任务清单
+- `email_draft`：草拟邮件
+
+### 自定义系统提示
+
+通过修改 .env 文件设置自定义提示：
+
+```env
+# 设置自定义提示，控制 LLM 如何处理文本
+LLM_CUSTOM_PROMPT=请优化以下文本的表达，使其更加清晰和专业：
+
+# 如果不设置，使用默认处理
+```
+
+### LLM 配置
+```env
+# 启用/禁用 LLM 处理
+LLM_ENABLED=true
+
+# OpenAI 配置
+OPENAI_API_KEY=your-openai-api-key-here
+OPENAI_MODEL=gpt-3.5-turbo
+
+# 处理参数
+LLM_TEMPERATURE=0.7
+LLM_MAX_TOKENS=1000
+```
+
+### 控制方式
+- 设置 `LLM_ENABLED=false` 可完全禁用 LLM，仅做语音转文本
+- 通过 `LLM_CUSTOM_PROMPT` 自定义处理方式
+- 所有控制都通过环境变量，简单明了
+
 ## 🎯 未来规划
 
 - [ ] **插件化架构**：支持 VS Code、JetBrains 等原生插件

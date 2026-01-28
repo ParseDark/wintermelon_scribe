@@ -9,6 +9,7 @@ from pynput import keyboard
 from scipy.io.wavfile import write as write_wav
 from dotenv import load_dotenv
 from speech_transcription import create_transcription_manager
+from llm_processor import LLMProcessor
 
 load_dotenv()
 
@@ -33,6 +34,13 @@ stream = None
 start_time = None
 ctrl_slash_pressed = False
 pressed_keys = set()
+
+# 初始化 LLM 处理器
+llm_processor = LLMProcessor()
+llm_enabled = llm_processor.get_provider_info().get("configured", False)
+
+# 从环境变量读取配置
+llm_enabled = llm_enabled and os.getenv("LLM_ENABLED", "true").lower() == "true"
 
 
 def initialize_paste_system():
@@ -218,7 +226,7 @@ def audio_callback(indata, frames, time_info, status):
 
 
 def on_key_press(key):
-    global ctrl_slash_pressed, pressed_keys, paste_mode
+    global ctrl_slash_pressed, pressed_keys
 
     pressed_keys.add(key)
 
@@ -226,7 +234,6 @@ def on_key_press(key):
         if key == keyboard.KeyCode.from_char('/') and keyboard.Key.ctrl in pressed_keys:
             if not ctrl_slash_pressed and not recording:
                 ctrl_slash_pressed = True
-                paste_mode = "clipboard"
                 start_recording()
     except AttributeError:
         pass
@@ -241,6 +248,7 @@ def on_key_release(key):
         if key == keyboard.KeyCode.from_char('/'):
             if ctrl_slash_pressed and recording:
                 ctrl_slash_pressed = False
+
                 audio_path, record_time = stop_recording()
 
                 if audio_path:
@@ -254,13 +262,38 @@ def process_audio(audio_path, record_time):
     text, inference_time = transcription_manager.transcribe(audio_path)
     os.unlink(audio_path)
 
-    if text:
-        copy_to_clipboard(text)
-        print("📋 已复制到剪贴板!")
-        paste_to_cursor(text, delay=0)  # 无延迟，AppleScript 会自动处理应用切换
-        print(f"⏱️  录音 {record_time:.2f}s | 转录 {inference_time:.2f}s | RTF {inference_time/record_time:.2f}x")
-    else:
+    if not text:
         print("❌ 转录失败或无内容")
+        return
+
+    # LLM 处理（如果启用且模式不是 "none"）
+    final_text = text
+    llm_time = 0.0
+
+    # 检查是否启用 LLM
+    if llm_enabled:
+        print("🤖 正在使用 LLM 处理...")
+        processed_text, llm_time = llm_processor.process(
+            text,
+            temperature=float(os.getenv("LLM_TEMPERATURE", "0.7")),
+            max_tokens=int(os.getenv("LLM_MAX_TOKENS", "1000"))
+        )
+        if processed_text:
+            final_text = processed_text
+            print("✅ LLM 处理完成")
+        else:
+            print("⚠️ LLM 处理失败，使用原始文本")
+
+    # 复制到剪贴板并粘贴
+    copy_to_clipboard(final_text)
+    print("📋 已复制到剪贴板!")
+    paste_to_cursor(final_text, delay=0)  # 无延迟，AppleScript 会自动处理应用切换
+
+    # 显示性能信息
+    perf_info = f"⏱️  录音 {record_time:.2f}s | 转录 {inference_time:.2f}s | RTF {inference_time/record_time:.2f}x"
+    if llm_enabled:
+        perf_info += f" | LLM {llm_time:.2f}s"
+    print(perf_info)
 
 
 def start_recording():
@@ -320,15 +353,40 @@ def main():
         return
 
     print("=" * 50)
-    print("🎙️  语音转文字工具 v2.0")
-    
+    print("🎙️  语音转文字工具 v3.0 (支持 LLM 增强)")
+
     # 显示提供商信息
     provider_info = transcription_manager.get_provider_info()
     print(f"🔧 语音转录提供商: {provider_info['name']}")
     print(f"🤖 使用模型: {provider_info['model']}")
+
+    # 显示 LLM 信息
+    llm_status = "禁用" if not llm_enabled else "启用"
+    print(f"🤖 LLM 处理: {llm_status}")
+
+    if llm_enabled:
+        llm_info = llm_processor.get_provider_info()
+        print(f"   • 提供商: {llm_info['name']}")
+
+        model = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
+        print(f"   • 模型: {model}")
+
+        custom_prompt = os.getenv("LLM_CUSTOM_PROMPT")
+        if custom_prompt:
+            print(f"   • 提示: {custom_prompt[:50]}...")
+        else:
+            print("   • 提示: 使用默认处理")
+
     print()
     print("快捷键说明：")
-    print("• Ctrl + / : 复制到剪贴板")
+    print("• Ctrl + / : 开始录音，自动处理并粘贴")
+    print()
+
+    if llm_enabled:
+        print("LLM 处理已配置，转录后将自动应用 LLM 处理")
+    else:
+        print("LLM 处理未启用，仅进行语音转文本")
+        print("设置 OPENAI_API_KEY 并设置 LLM_ENABLED=true 来启用")
     print()
     print("使用方法：")
     print("1. 按住相应快捷键开始录音")
