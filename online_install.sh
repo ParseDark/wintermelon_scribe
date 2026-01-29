@@ -5,7 +5,7 @@
 
 set -e
 
-VERSION="0.0.0.5.7"
+VERSION="0.0.5.7"
 # 配置
 ZIP_URL="https://ghfast.top/https://github.com/ParseDark/wintermelon_scribe/archive/refs/tags/${VERSION}/wintermelon_scribe-${VERSION}.zip"
 PROJECT_NAME="wintermelon_scribe-${VERSION}"
