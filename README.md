@@ -12,157 +12,200 @@
 
 冬瓜速记是一个系统级的语音输入工具，致力于打造更快捷、更方便的输入体验。通过与各种开发工具和应用的深度集成，让语音输入成为日常工作中自然的一部分。我们的目标是：**让语音成为系统级的输入方式，让输入更高效**。
 
-## 安装依赖
+---
+
+## 📦 用户安装（一键安装）
+
+> 适合普通用户，安装后程序将在后台自动运行
+
+### 快速安装 ⭐
 
 ```bash
-# 使用 uv (推荐)
-uv pip install -r requirements.txt
+# 1. 克隆或下载项目
+git clone https://github.com/ParseDark/wintermelon_scribe.git
+cd wintermelon_scribe
 
-# 或使用 pip
-pip install -r requirements.txt
-```
-
-## 🚀 快速开始
-
-### 方式一：直接运行（推荐用于测试）
-
-```bash
-# 激活虚拟环境并运行
-source .venv/bin/activate
-python main.py
-```
-
-### 方式二：后台运行（推荐用于日常使用）⭐
-
-让冬瓜速记在后台自动运行，开机自启：
-
-```bash
-# 一键安装为后台服务
+# 2. 一键安装（自动配置所有环境）
 ./install.sh
 ```
 
-安装后将：
-- 🔋 开机自动启动
-- 🤫 后台静默运行
-- 🚫 无需打开终端
-- ⌨️ 快捷键和通知正常工作
-- 🎙️ 进程名称显示为 "WinterMelon Scribe"
+### 安装后效果
 
-查看状态：`./status.sh`
-卸载服务：`./uninstall.sh`
+- 🔋 **开机自动启动**
+- 🤫 **后台静默运行**
+- 🚫 **无需打开终端**
+- ⌨️ **快捷键 Ctrl + / 立即可用**
+- 🎙️ **进程名称显示为 "WinterMelon Scribe"**
 
-详细说明：[LAUNCH_AGENT.md](LAUNCH_AGENT.md)
+### 常用操作
+
+```bash
+# 查看运行状态
+./status.sh
+
+# 卸载程序
+./uninstall.sh
+```
+
+### 首次使用
+
+1. **安装**后需要授权系统权限（弹窗提示时点击允许）
+2. **配置 API 密钥**：编辑 `.env` 文件，设置你的 API 密钥
+3. **开始使用**：按 `Ctrl + /` 开始录音
+
+---
+
+## 👨‍💻 开发者安装
+
+> 适合开发者，便于调试和二次开发
+
+### 环境准备
+
+```bash
+# 检查 Python 版本（需要 3.8+）
+python3 --version
+
+# 推荐使用 uv（更快的包管理器）
+pip install uv
+```
+
+### 安装依赖
+
+```bash
+# 方式一：使用 uv（推荐）
+uv venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
+```
+
+### 直接运行（调试模式）
+
+```bash
+# 激活虚拟环境
+source .venv/bin/activate
+
+# 直接运行
+python main.py
+```
+
+### 后台运行模式
+
+```bash
+# 安装为后台服务
+./install.sh
+
+# 查看日志
+tail -f logs/wintermelon_scribe.log
+```
+
+---
 
 ## 🔧 macOS 权限设置
+
+首次运行时需要授予以下权限：
 
 ### 必需权限
 
 1. **系统偏好设置** → **安全性与隐私** → **隐私**
-2. 选择 **辅助功能**
-3. 添加终端应用（Terminal.app、iTerm2 等）
-4. 选择 **屏幕录制**
-5. 再次添加终端应用
+2. 选择 **辅助功能** → 添加终端或 Python 应用
+3. 选择 **屏幕录制** → 添加终端或 Python 应用
 
-> ⚠️ 权限设置完成后需重启终端
+> ⚠️ 权限设置完成后需重启程序
 
-## 🔌 集成开发工具
+---
 
-冬瓜速记可以与以下工具无缝配合：
+## 🎮 使用方法
+
+### 快捷键
+
+- **Ctrl + /**：开始录音，松开自动处理并粘贴
+
+### 支持的应用
 
 - **VS Code**：代码编写、注释生成
 - **Cursor**：AI 辅助编程时的语音输入
-- **Continue.dev**：增强开发体验
 - **JetBrains IDEs**：Java、Python 等开发
 - **Vim/Neovim**：终端编辑器的语音增强
 - **Obsidian/Notion**：笔记系统
 - **iA Writer/Ulysses**：专业写作
+- 任何支持文本输入的应用
+
+---
 
 ## 🧠 LLM 增强功能
 
 v3.0 新增 LLM 文本处理功能，支持在语音转文本后进行智能处理。
 
-### 快捷键
-- **Ctrl + /**：开始录音，自动根据配置处理并粘贴
-
 ### 支持的 LLM 提供商
+
 - OpenAI (GPT-3.5, GPT-4, GPT-4-turbo 等)
 
-### 自定义系统提示
+### 处理模式
 
-通过修改 .env 文件设置自定义提示：
+- `improve`：改进文本表达（默认）
+- `summarize`：总结要点
+- `correct`：纠正语法错误
+- `format_code`：格式化代码
+- `translate_en`：翻译为英文
+- `translate_zh`：翻译为中文
+- `meeting_notes`：整理会议纪要
+- `todo_list`：转换为任务清单
+- `email_draft`：草拟邮件
+
+### 配置示例
 
 ```env
-# 设置自定义提示，控制 LLM 如何处理文本
-LLM_CUSTOM_PROMPT=请优化以下文本的表达，使其更加清晰和专业：
+# .env 文件
+# 转录服务配置（二选一）
+SILICONFLOW_API_KEY=your-api-key-here
+# 或
+GROQ_API_KEY=your-groq-api-key-here
+TRANSCRIPTION_PROVIDER=groq
 
-# 如果不设置，使用默认处理
-```
-
-### LLM 配置
-```env
-# 启用/禁用 LLM 处理
+# LLM 配置（可选）
 LLM_ENABLED=true
-
-# OpenAI 配置
 OPENAI_API_KEY=your-openai-api-key-here
 OPENAI_MODEL=gpt-3.5-turbo
 
-# 处理参数
-LLM_TEMPERATURE=0.7
-LLM_MAX_TOKENS=1000
+# 通知配置
+NOTIFICATION_ENABLED=true
+NOTIFICATION_SOUND_ENABLED=true
+
+# 自定义提示（可选）
+LLM_CUSTOM_PROMPT=请优化以下文本的表达：
 ```
 
-### 控制方式
-- 设置 `LLM_ENABLED=false` 可完全禁用 LLM，仅做语音转文本
-- 通过 `LLM_CUSTOM_PROMPT` 自定义处理方式
-- 所有控制都通过环境变量，简单明了
+---
 
-## 🔒 API 配置
-支持多个语音转录提供商，请根据需要选择配置：
+## 🔒 API 服务配置
 
-### 支持的提供商
-- **SiliconFlow**（默认）：支持中文优化的 SenseVoice 模型，推荐用于本地录音场景
-- **Groq**：使用 Whisper Large V3 Turbo 模型，快速响应
+### SiliconFlow（推荐）
 
-### SiliconFlow 配置（默认）
-1. 复制环境变量示例文件：
-```bash
-cp .env.example .env
-```
-2. 编辑 `.env` 文件，设置你的 API 密钥：
-```env
-SILICONFLOW_API_KEY=your-api-key-here
-# 可选：指定模型
-SILICONFLOW_MODEL=FunAudioLLM/SenseVoiceSmall
-```
+1. 注册并获取 API Key：https://siliconflow.cn
+2. 在 `.env` 文件中配置：
+   ```env
+   SILICONFLOW_API_KEY=your-api-key-here
+   ```
 
-### Groq 配置
-1. 编辑 `.env` 文件，设置 Groq API 密钥：
-```env
-GROQ_API_KEY=your-groq-api-key-here
-# 可选：指定模型（默认为 whisper-large-v3-turbo）
-GROQ_MODEL=whisper-large-v3-turbo
-# 设置转录提供商为 Groq
-TRANSCRIPTION_PROVIDER=groq
-```
+### Groq
 
+1. 注册并获取 API Key：https://groq.com
+2. 在 `.env` 文件中配置：
+   ```env
+   GROQ_API_KEY=your-groq-api-key-here
+   TRANSCRIPTION_PROVIDER=groq
+   ```
 
-### 环境变量配置方式
+### OpenAI（用于 LLM 处理）
 
-#### SiliconFlow 环境变量
-```bash
-export SILICONFLOW_API_KEY="your-api-key-here"
-```
+1. 注册并获取 API Key：https://platform.openai.com
+2. 在 `.env` 文件中配置：
+   ```env
+   OPENAI_API_KEY=your-openai-api-key-here
+   LLM_ENABLED=true
+   ```
 
-#### Groq 环境变量
-```bash
-export GROQ_API_KEY="your-groq-api-key-here"
-export TRANSCRIPTION_PROVIDER=groq
-```
-
-### 直接修改代码
-
-在 `main.py` 中直接修改配置变量。
+---
 
 ## 🛠️ 故障排除
 
@@ -171,11 +214,39 @@ export TRANSCRIPTION_PROVIDER=groq
 | 按键无响应 | 检查辅助功能权限 |
 | 粘贴失败 | 检查屏幕录制权限 |
 | 转录为空 | 检查麦克风权限和 API 密钥 |
-| 首次粘贴失败 | 重启程序或检查系统权限 |
+| 服务未运行 | 运行 `./status.sh` 查看状态 |
+
+### 常见问题
+
+**Q: 如何查看日志？**
+```bash
+# 查看运行日志
+tail -f logs/wintermelon_scribe.log
+
+# 查看错误日志
+tail -f logs/wintermelon_scribe.err
+```
+
+**Q: 如何重启服务？**
+```bash
+# 停止
+launchctl stop com.wintermelon.scribe
+
+# 启动
+launchctl start com.wintermelon.scribe
+```
+
+**Q: 如何更新配置？**
+修改 `.env` 文件后，需要重启服务：
+```bash
+./ uninstall.sh && ./install.sh
+```
+
+---
 
 ## 🤝 贡献
 
-冬瓜速记正在快速发展中，欢迎贡献代码、提出建议或报告问题！
+欢迎提交 Issue 和 Pull Request！
 
 ## 📄 许可证
 
