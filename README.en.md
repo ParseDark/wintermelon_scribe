@@ -83,7 +83,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Direct Run (Debug Mode)
+### Direct Run
 
 ```bash
 # Activate virtual environment
