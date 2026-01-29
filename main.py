@@ -10,6 +10,7 @@ from scipy.io.wavfile import write as write_wav
 from dotenv import load_dotenv
 from speech_transcription import create_transcription_manager
 from llm_processor import LLMProcessor
+import sys
 
 load_dotenv()
 
@@ -41,6 +42,10 @@ llm_enabled = llm_processor.get_provider_info().get("configured", False)
 
 # 从环境变量读取配置
 llm_enabled = llm_enabled and os.getenv("LLM_ENABLED", "true").lower() == "true"
+
+# 通知配置
+notification_enabled = os.getenv("NOTIFICATION_ENABLED", "true").lower() == "true"
+notification_sound_enabled = os.getenv("NOTIFICATION_SOUND_ENABLED", "true").lower() == "true"
 
 
 def initialize_paste_system():
@@ -99,12 +104,40 @@ def initialize_paste_system():
     print("🚀 粘贴系统初始化完成")
 
 
+def show_notification(title, message, subtitle=None, sound=None):
+    """显示系统通知 (macOS)"""
+    try:
+        # 构建通知内容
+        notification_script = f'''
+        display notification "{message}" with title "{title}"'''
+        if subtitle:
+            notification_script += f' subtitle "{subtitle}"'
+        if sound:
+            notification_script += f' sound name "{sound}"'
+
+        # 执行通知命令
+        process = subprocess.run(['osascript', '-e', notification_script],
+                               capture_output=True, text=True, timeout=10)
+
+        if process.returncode != 0:
+            print(f"⚠️ 通知发送失败: {process.stderr}")
+            return False
+
+        return True
+    except subprocess.TimeoutExpired:
+        print("⚠️ 通知发送超时")
+        return False
+    except Exception as e:
+        print(f"⚠️ 通知发送异常: {e}")
+        return False
+
+
 def copy_to_clipboard(text):
     """复制文本到剪贴板 (macOS)"""
     try:
         process = subprocess.Popen(['pbcopy'], stdin=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate(text.encode('utf-8'))
-        
+
         if process.returncode != 0:
             print(f"❌ 复制到剪贴板失败: {stderr.decode()}")
             return False
@@ -259,11 +292,17 @@ def on_key_release(key):
 
 def process_audio(audio_path, record_time):
     """处理音频文件 - 使用新的转录模块"""
+    print("🔄 正在转录音频...")
+
     text, inference_time = transcription_manager.transcribe(audio_path)
     os.unlink(audio_path)
 
     if not text:
         print("❌ 转录失败或无内容")
+        # 显示失败通知（可选音效）
+        if notification_enabled:
+            sound = "Basso" if notification_sound_enabled else None
+            show_notification("转录失败", "无法识别语音内容，请重试", "冬瓜速记", sound)
         return
 
     # LLM 处理（如果启用且模式不是 "none"）
@@ -287,7 +326,31 @@ def process_audio(audio_path, record_time):
     # 复制到剪贴板并粘贴
     copy_to_clipboard(final_text)
     print("📋 已复制到剪贴板!")
-    paste_to_cursor(final_text, delay=0)  # 无延迟，AppleScript 会自动处理应用切换
+
+    # 粘贴到光标位置
+    paste_success = paste_to_cursor(final_text, delay=0)  # 无延迟，AppleScript 会自动处理应用切换
+
+    # 显示成功通知
+    if notification_enabled:
+        if paste_success:
+            # 准备通知信息
+            if llm_enabled:
+                subtitle = f"转录+LLM处理完成 (用时{inference_time+llm_time:.1f}s)"
+            else:
+                subtitle = f"转录完成 (用时{inference_time:.1f}s)"
+
+            # 显示文本预览（最多50个字符）
+            preview = final_text[:50].replace('\n', ' ')
+            if len(final_text) > 50:
+                preview += "..."
+
+            # 成功通知（可选音效）
+            sound = "Morse" if notification_sound_enabled else None
+            show_notification("转录成功", preview, subtitle, sound)
+        else:
+            # 粘贴失败通知（可选音效）
+            sound = "Glass" if notification_sound_enabled else None
+            show_notification("粘贴失败", "已复制到剪贴板，请手动粘贴", "冬瓜速记", sound)
 
     # 显示性能信息
     perf_info = f"⏱️  录音 {record_time:.2f}s | 转录 {inference_time:.2f}s | RTF {inference_time/record_time:.2f}x"
@@ -315,6 +378,11 @@ def start_recording():
 
     stream.start()
     print("🎤 开始录音...")
+
+    # 显示录音开始通知
+    if notification_enabled:
+        sound = "Tink" if notification_sound_enabled else None
+        show_notification("正在录音", "请开始说话，松开按键结束", "录音中...", sound)
 
 
 def stop_recording():
@@ -409,6 +477,11 @@ def main():
     )
 
     listener.start()
+
+    # 显示准备就绪通知
+    if notification_enabled:
+        sound = "Pop" if notification_sound_enabled else None
+        show_notification("冬瓜速记已启动", "按 Ctrl+/ 开始录音", "准备就绪", sound)
 
     try:
         while True:
