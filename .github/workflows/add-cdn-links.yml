@@ -1,0 +1,87 @@
+name: Add CDN Links to Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  add-cdn-links:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Generate and Add CDN Links
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          QINIU_DOMAIN: ${{ secrets.QINIU_DOMAIN }}
+        run: |
+          # 获取 Release 信息
+          RELEASE_TAG=${{ github.event.release.tag_name }}
+          REPO_NAME=${{ github.repository }}
+          REPO_OWNER=${{ github.repository_owner }}
+          REPO_SHORT_NAME=${REPO_NAME#*/}
+
+          # 构建七牛云链接内容
+          CDN_CONTENT="
+
+          ## 🚀 CDN 加速下载
+
+          > 💡 以下链接通过七牛云 CDN 加速，国内访问速度更快
+
+          ### 📦 源代码
+          - [${REPO_SHORT_NAME}-${RELEASE_TAG}.zip](https://${QINIU_DOMAIN}/github-release/${REPO_OWNER}/${REPO_SHORT_NAME}/refs/tags/${RELEASE_TAG}/${REPO_SHORT_NAME}-${RELEASE_TAG}.zip)
+          - [${REPO_SHORT_NAME}-${RELEASE_TAG}.tar.gz](https://${QINIU_DOMAIN}/github-release/${REPO_OWNER}/${REPO_SHORT_NAME}/refs/tags/${RELEASE_TAG}/${REPO_SHORT_NAME}-${RELEASE_TAG}.tar.gz)"
+
+          # 获取所有 assets 并转换成 CDN 链接
+          ASSETS_JSON='${{ toJson(github.event.release.assets) }}'
+          if [ "$ASSETS_JSON" != "[]" ]; then
+            CDN_CONTENT="$CDN_CONTENT
+
+          ### 📱 附件下载"
+            echo "$ASSETS_JSON" | jq -r '.[] | "- [\(.name)](https://'${QINIU_DOMAIN}'/github-release-assets/'${REPO_OWNER}'/'${REPO_SHORT_NAME}'/releases/download/'${RELEASE_TAG}'/\(.name))"' | while read -r line; do
+              CDN_CONTENT="$CDN_CONTENT
+          $line"
+            done
+          fi
+
+          # 获取原始 Release 内容并添加 CDN 链接
+          ORIGINAL_BODY='${{ github.event.release.body }}'
+          FINAL_BODY="${ORIGINAL_BODY}${CDN_CONTENT}
+
+          ---
+
+          *七牛云 CDN 加速由 [${QINIU_DOMAIN}](${QINIU_DOMAIN}) 提供*"
+
+          # 更新 Release
+          echo "$FINAL_BODY" | gh release edit ${{ github.event.release.id }} --notes-file -
+
+          echo "✅ 已在 Release 中添加 CDN 下载链接"
+
+      - name: Show Configuration Summary
+        run: |
+          echo "# 🎯 CDN 链接已添加" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Release Description 已更新，添加了七牛云 CDN 加速链接" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📋 让 CDN 生效的步骤" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 1. 在七牛云控制台配置镜像存储" >> $GITHUB_STEP_SUMMARY
+          echo "登录七牛云控制台 → 对象存储 → 空间设置 → 镜像存储" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 2. 添加两条镜像规则" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**规则 1 - 源代码包**" >> $GITHUB_STEP_SUMMARY
+          echo '- 镜像源：`github.com`' >> $GITHUB_STEP_SUMMARY
+          echo '- 回源路径：`/${{ github.repository_owner }}/${{ github.event.repository.name }}/archive/refs/tags/${{ github.event.release.tag_name }}/`' >> $GITHUB_STEP_SUMMARY
+          echo '- 访问路径：`/github-release/${{ github.repository_owner }}/${{ github.event.repository.name }}/refs/tags/${{ github.event.release.tag_name }}/`' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**规则 2 - Release Assets（可选）**" >> $GITHUB_STEP_SUMMARY
+          echo '- 镜像源：`github.com`' >> $GITHUB_STEP_SUMMARY
+          echo '- 回源路径：`/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/download/${{ github.event.release.tag_name }}/`' >> $GITHUB_STEP_SUMMARY
+          echo '- 访问路径：`/github-release-assets/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/download/${{ github.event.release.tag_name }}/`' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## ✨ 优势" >> $GITHUB_STEP_SUMMARY
+          echo "- 🚀 **无需上传文件** - CDN 自动从 GitHub 拉取" >> $GITHUB_STEP_SUMMARY
+          echo "- 💰 **零存储成本** - 按需缓存，不占用空间" >> $GITHUB_STEP_SUMMARY
+          echo "- ⚡ **访问加速** - 国内容量节点，下载更快" >> $GITHUB_STEP_SUMMARY
