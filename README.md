@@ -25,6 +25,8 @@
 git clone https://github.com/ParseDark/wintermelon_scribe.git
 cd wintermelon_scribe
 
+cp .env.example .env
+
 # 2. 一键安装（自动配置所有环境）
 ./install.sh
 ```
@@ -132,25 +134,105 @@ tail -f logs/wintermelon_scribe.log
 
 ---
 
-## 🧠 LLM 增强功能
+## 🔧 环境配置工具
 
-v3.0 新增 LLM 文本处理功能，支持在语音转文本后进行智能处理。
+WinterMelon Scribe 提供了一个交互式的环境配置工具 `env_config.py`，帮助你轻松配置所有必需的 API 密钥和设置。
 
-### 支持的 LLM 提供商
+### 使用配置工具
 
-- OpenAI (GPT-3.5, GPT-4, GPT-4-turbo 等)
+```bash
+# 运行交互式配置工具
+python3 env_config.py
 
-### 处理模式
+# 或指定特定的 .env 文件路径
+python3 env_config.py /path/to/.env
+```
 
-- `improve`：改进文本表达（默认）
-- `summarize`：总结要点
-- `correct`：纠正语法错误
-- `format_code`：格式化代码
-- `translate_en`：翻译为英文
-- `translate_zh`：翻译为中文
-- `meeting_notes`：整理会议纪要
-- `todo_list`：转换为任务清单
-- `email_draft`：草拟邮件
+### 配置选项
+
+配置工具支持以下配置模块：
+
+1. **SiliconFlow API** - 免费的语音转转录服务
+   - API Key（必需）
+   - API URL
+   - 模型选择（默认：FunAudioLLM/SenseVoiceSmall）
+
+2. **Groq API** - 备选的转录服务
+   - API Key
+   - 模型选择（默认：whisper-large-v3-turbo）
+
+3. **Transcription Provider** - 选择转录服务商
+   - siliconflow（推荐，免费）
+   - groq
+
+4. **Audio Configuration** - 音频设置
+   - 采样率（默认：16000）
+
+5. **LLM Configuration** - 文本后处理
+   - OpenAI API Key
+   - API Base URL（可选）
+   - 模型选择（gpt-3.5-turbo, gpt-4, gpt-4-turbo, gpt-4o）
+   - LLM 处理开关
+   - Temperature（0.0-1.0）
+   - 最大 Token 数
+   - 自定义系统提示（可选）
+
+6. **Notification Configuration** - macOS 系统通知
+   - 启用/禁用通知
+   - 启用/禁用提示音
+
+### SiliconFlow 免费获取 API Key
+
+🎉 **免费使用语音转录服务**
+
+感谢 SiliconFlow 提供的免费语音服务，让 WinterMelon Scribe 完全免费使用：
+
+- ✨ **免费转录** - 无需承担任何费用
+- 💰 **零成本使用** - 注册即可获得 API Key
+- 🎯 **无需昂贵的语音输入软件**
+- 🚀 **高精度识别**
+
+注册地址：https://account.siliconflow.cn/en/login?redirect=https%3A%2F%2Fcloud.siliconflow.cn&invitation=VQcfhhQS
+
+### 配置文件示例
+
+运行配置工具后，会生成类似以下的 `.env` 文件：
+
+```env
+# SiliconFlow API Configuration
+SILICONFLOW_API_KEY=your-api-key-here
+SILICONFLOW_API_URL=https://api.siliconflow.cn/v1/audio/transcriptions
+SILICONFLOW_MODEL=FunAudioLLM/SenseVoiceSmall
+
+# Groq API Configuration
+# GROQ_API_KEY=your-groq-api-key-here
+# GROQ_MODEL=whisper-large-v3-turbo
+
+# Transcription Provider Selection
+TRANSCRIPTION_PROVIDER=siliconflow
+
+# Audio Configuration
+AUDIO_SAMPLE_RATE=16000
+
+# LLM Configuration (for post-processing transcriptions)
+# Choose one of the LLM providers below
+OPENAI_API_KEY=your-openai-api-key-here
+OPENAI_API_BASE=https://api.openai.com/v1  # Optional, uses default if not set
+OPENAI_MODEL=gpt-3.5-turbo  # or gpt-4, gpt-4-turbo, etc.
+
+# LLM Processing Configuration
+LLM_ENABLED=true  # Enable/disable LLM processing (true/false)
+LLM_TEMPERATURE=0.7  # 0.0-1.0, lower is more deterministic
+LLM_MAX_TOKENS=1000  # Maximum tokens in LLM response
+
+# Custom System Prompt (optional)
+# Set a custom prompt to control how the LLM processes your text
+# LLM_CUSTOM_PROMPT=请优化以下文本的表达，使其更加清晰和专业：
+
+# Notification Configuration (macOS only)
+NOTIFICATION_ENABLED=true  # Enable/disable system notifications (true/false)
+NOTIFICATION_SOUND_ENABLED=true  # Enable notification sounds (true/false)
+```
 
 ### 配置示例
 
