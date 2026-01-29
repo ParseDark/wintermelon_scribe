@@ -56,7 +56,7 @@ fi
 
 # 检查 .env 文件是否存在，如果不存在则执行 env_config.py
 if [ ! -f "$PROJECT_DIR/.env" ]; then
-    python env_config.py
+    python3 env_config.py
 fi
 
 echo -e "${BLUE}📦 检测到存在.env 文件后，继续安装...${NC}"
