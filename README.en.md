@@ -64,17 +64,6 @@ v3.0 introduces LLM text processing capabilities, supporting intelligent process
 ### Supported LLM Providers
 - OpenAI (GPT-3.5, GPT-4, GPT-4-turbo, etc.)
 
-### Processing Modes
-- `improve`: Improve text expression (default)
-- `summarize`: Summarize key points
-- `correct`: Correct grammatical errors
-- `format_code`: Format code
-- `translate_en`: Translate to English
-- `translate_zh`: Translate to Chinese
-- `meeting_notes`: Organize meeting minutes
-- `todo_list`: Convert to task list
-- `email_draft`: Draft emails
-
 ### Custom System Prompts
 
 Set custom prompts by modifying the .env file:
