@@ -8,22 +8,11 @@
 
 > An intelligent tool that makes voice input as smooth as silk, specially designed for developers and creators
 
-## 🎯 Product Vision
+## 🎯 Product Positioning
 
-WinterMelon Scribe aims to become a developer tool plugin like GitHub Copilot, Cursor, and Continue.dev, making coding, documentation, and note-taking more efficient and natural through voice technology. Our goal is: **Free your hands, let your thoughts keep up with your speech**.
+WinterMelon Scribe is a system-level voice input tool dedicated to creating a faster and more convenient input experience. Through deep integration with various development tools and applications, it makes voice input a natural part of daily work. Our goal is: **Make voice a system-level input method, making input more efficient**.
 
-## ✨ Core Features
-
-- **🎤 Voice-to-Text**: High-accuracy speech recognition supporting technical terms and code keywords
-- **⌨️ Smart Paste**: Automatically paste to cursor position without manual operation
-- **🚀 Minimal Interaction**: One-click activation, instant response
-- **🔒 Privacy Protection**: Local-first, automatic cleanup of sensitive data
-
-## 🎮 Shortcuts
-
-- **Cmd + ;**: Start recording, automatically transcribe and paste after release
-
-## Installation
+## Installing Dependencies
 
 ```bash
 # Using uv (recommended)
@@ -41,25 +30,6 @@ source .venv/bin/activate
 python main.py
 ```
 
-## 📝 Use Cases
-
-### 💻 Programming & Development
-- Ask AI programming assistants: "Why is this React component throwing an error? Please analyze it"
-- Request code improvement suggestions: "How can I optimize this algorithm's time complexity?"
-- Request code examples: "Give me a Python example for asynchronously downloading files"
-- Debug logging: "Line 45 in userservice.py, user data is not being saved to the database correctly after update"
-
-### 📚 Documentation Writing
-- Quick meeting notes: "Three new features were confirmed in today's product meeting"
-- Technical documentation: "API response format needs to include status and pagination info"
-- Code comments: "This function filters invalid user input"
-- README writing: "Installation steps require configuring environment variables first"
-
-### 💡 Learning & Research
-- Learning notes: "Today I learned about the principles of React Hooks"
-- Technical points summary: "Docker container networking has three modes: bridge, host, none"
-- Issue tracking: "Need to investigate why this API endpoint's response time suddenly increased"
-
 ## 🔧 macOS Permission Settings
 
 ### Required Permissions
@@ -72,9 +42,9 @@ python main.py
 
 > ⚠️ Restart terminal after setting permissions
 
-## 🔌 IDE Integration
+## 🔌 Integration with Development Tools
 
-WinterMelon Scribe seamlessly integrates with:
+WinterMelon Scribe seamlessly works with:
 
 - **VS Code**: Code writing, comment generation
 - **Cursor**: Voice input during AI-assisted programming
@@ -84,47 +54,102 @@ WinterMelon Scribe seamlessly integrates with:
 - **Obsidian/Notion**: Note-taking systems
 - **iA Writer/Ulysses**: Professional writing
 
-## 🎯 Future Plans
+## 🧠 LLM Enhanced Features
 
-- [ ] **Plugin Architecture**: Native plugins for VS Code, JetBrains, etc.
-- [ ] **Command Palette**: Voice-triggered code snippets and commands
-- [ ] **Multi-language Support**: Optimized mixed Chinese-English recognition
-- [ ] **Code Mode**: Automatic recognition and formatting of code blocks
-- [ ] **Team Collaboration**: Shared voice templates and quick phrases
-- [ ] **Cloud Sync**: Cross-device sync of settings and preferences
+v3.0 introduces LLM text processing capabilities, supporting intelligent processing after voice-to-text conversion.
+
+### Shortcuts
+- **Ctrl + /**: Start recording, automatically process and paste based on configuration
+
+### Supported LLM Providers
+- OpenAI (GPT-3.5, GPT-4, GPT-4-turbo, etc.)
+
+### Processing Modes
+- `improve`: Improve text expression (default)
+- `summarize`: Summarize key points
+- `correct`: Correct grammatical errors
+- `format_code`: Format code
+- `translate_en`: Translate to English
+- `translate_zh`: Translate to Chinese
+- `meeting_notes`: Organize meeting minutes
+- `todo_list`: Convert to task list
+- `email_draft`: Draft emails
+
+### Custom System Prompts
+
+Set custom prompts by modifying the .env file:
+
+```env
+# Set custom prompts to control how LLM processes text
+LLM_CUSTOM_PROMPT=Please optimize the expression of the following text to make it clearer and more professional:
+
+# If not set, default processing will be used
+```
+
+### LLM Configuration
+```env
+# Enable/disable LLM processing
+LLM_ENABLED=true
+
+# OpenAI configuration
+OPENAI_API_KEY=your-openai-api-key-here
+OPENAI_MODEL=gpt-3.5-turbo
+
+# Processing parameters
+LLM_TEMPERATURE=0.7
+LLM_MAX_TOKENS=1000
+```
+
+### Control Methods
+- Set `LLM_ENABLED=false` to completely disable LLM, only perform voice-to-text
+- Customize processing through `LLM_CUSTOM_PROMPT`
+- All controls are through environment variables, simple and clear
 
 ## 🔒 API Configuration
+Supports multiple speech transcription providers, please choose and configure according to your needs:
 
-Using SiliconFlow API for speech transcription with three configuration methods:
+### Supported Providers
+- **SiliconFlow** (default): Supports Chinese-optimized SenseVoice model, recommended for local recording scenarios
+- **Groq**: Uses Whisper Large V3 Turbo model for fast responses
 
-### Method 1: Using .env file (Recommended)
-
-1. Copy the environment variable example file:
+### SiliconFlow Configuration (Default)
+1. Copy environment variable example file:
 ```bash
 cp .env.example .env
 ```
-
 2. Edit `.env` file and set your API key:
 ```env
 SILICONFLOW_API_KEY=your-api-key-here
+# Optional: specify model
+SILICONFLOW_MODEL=FunAudioLLM/SenseVoiceSmall
 ```
 
-### Method 2: Environment Variable
+### Groq Configuration
+1. Edit `.env` file and set Groq API key:
+```env
+GROQ_API_KEY=your-groq-api-key-here
+# Optional: specify model (default is whisper-large-v3-turbo)
+GROQ_MODEL=whisper-large-v3-turbo
+# Set transcription provider to Groq
+TRANSCRIPTION_PROVIDER=groq
+```
 
+### Environment Variable Configuration
+
+#### SiliconFlow Environment Variables
 ```bash
 export SILICONFLOW_API_KEY="your-api-key-here"
 ```
 
-### Method 3: Direct Code Modification
+#### Groq Environment Variables
+```bash
+export GROQ_API_KEY="your-groq-api-key-here"
+export TRANSCRIPTION_PROVIDER=groq
+```
 
-Modify the `API_TOKEN` variable directly in `main.py`.
+### Direct Code Modification
 
-## ⚡ Performance Metrics
-
-- **Response Time**: < 100ms key response
-- **Transcription Latency**: Real-time Factor (RTF) < 0.3x
-- **Accuracy**: > 95% in technical scenarios
-- **Memory Usage**: < 50MB runtime memory
+Modify configuration variables directly in `main.py`.
 
 ## 🛠️ Troubleshooting
 
