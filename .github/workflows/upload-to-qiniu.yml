@@ -20,7 +20,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install @cloudbase-manager/qiniu
+        run: npm install qiniu
 
       - name: Download all release assets
         env:
@@ -46,85 +46,49 @@ jobs:
           QINIU_DOMAIN: ${{ secrets.QINIU_DOMAIN }}
         run: |
           node -e "
-          const crypto = require('crypto');
-          const http = require('https');
+          const qiniu = require('qiniu');
           const fs = require('fs');
           const path = require('path');
 
-          const accessKey = process.env.QINIU_ACCESS_KEY;
-          const secretKey = process.env.QINIU_SECRET_KEY;
-          const bucket = process.env.QINIU_BUCKET;
-          const domain = process.env.QINIU_DOMAIN;
+          // 配置七牛云认证
+          const mac = new qiniu.auth.digest.Mac(
+            process.env.QINIU_ACCESS_KEY,
+            process.env.QINIU_SECRET_KEY
+          );
+
+          // 配置上传策略
+          const putPolicy = new qiniu.rs.PutPolicy({
+            scope: process.env.QINIU_BUCKET
+          });
+          const uploadToken = putPolicy.uploadToken(mac);
+
+          // 构建上传对象
+          const config = new qiniu.conf.Config();
+          // 华东机房
+          config.zone = qiniu.zone.Zone_z0;
+          // 是否使用https域名
+          config.useHttpsDomain = true;
+          // 上传是否使用cdn加速
+          config.useCdnDomain = true;
+
+          const formUploader = new qiniu.form_up.FormUploader(config);
+          const putExtra = new qiniu.form_up.PutExtra();
 
           // 七牛云上传函数
           function uploadToQiniu(filePath, key) {
             return new Promise((resolve, reject) => {
-              // 生成上传 token
-              const putPolicy = JSON.stringify({
-                scope: bucket + ':' + key,
-                deadline: Math.floor(Date.now() / 1000) + 3600
-              });
-
-              const encodedPutPolicy = Buffer.from(putPolicy).toString('base64')
-                .replace(/\+/g, '-')
-                .replace(/\//g, '_');
-
-              const signature = crypto.createHmac('sha1', secretKey)
-                .update(encodedPutPolicy)
-                .digest('base64');
-
-              const uploadToken = accessKey + ':' + signature + ':' + encodedPutPolicy;
-
-              // 读取文件
-              const fileData = fs.readFileSync(filePath);
-
-              // 构建表单数据
-              const boundary = '----WebKitFormBoundary' + Math.random().toString(36).substr(2);
-              let formData = '--' + boundary + '\\r\\n';
-              formData += 'Content-Disposition: form-data; name=\"token\"\\r\\n\\r\\n';
-              formData += uploadToken + '\\r\\n';
-              formData += '--' + boundary + '\\r\\n';
-              formData += 'Content-Disposition: form-data; name=\"key\"\\r\\n\\r\\n';
-              formData += key + '\\r\\n';
-              formData += '--' + boundary + '\\r\\n';
-              formData += 'Content-Disposition: form-data; name=\"file\"; filename=\"' + path.basename(filePath) + '\"\\r\\n';
-              formData += 'Content-Type: application/octet-stream\\r\\n\\r\\n';
-
-              const formDataEnd = '\\r\\n--' + boundary + '--\\r\\n';
-
-              const options = {
-                hostname: 'upload.qiniup.com',
-                port: 443,
-                path: '/',
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'multipart/form-data; boundary=' + boundary,
-                  'Content-Length': Buffer.byteLength(formData + fileData + formDataEnd)
+              formUploader.putFile(uploadToken, key, filePath, putExtra, (respErr, respBody, respInfo) => {
+                if (respErr) {
+                  reject(respErr);
+                  return;
                 }
-              };
-
-              const req = http.request(options, (res) => {
-                let data = '';
-                res.on('data', chunk => data += chunk);
-                res.on('end', () => {
-                  if (res.statusCode === 200) {
-                    try {
-                      const result = JSON.parse(data);
-                      console.log('✓ Upload successful:', key);
-                      resolve(result);
-                    } catch (e) {
-                      reject(e);
-                    }
-                  } else {
-                    reject(new Error('Upload failed: ' + data));
-                  }
-                });
+                if (respInfo.statusCode === 200) {
+                  console.log('✓ Upload successful:', key);
+                  resolve(respBody);
+                } else {
+                  reject(new Error('Upload failed: ' + respInfo.statusCode + ' ' + respBody));
+                }
               });
-
-              req.on('error', reject);
-              req.write(formData);
-              req.write(fileData);
-              req.end(formDataEnd);
             });
           }
 
@@ -143,7 +107,7 @@ jobs:
                   // 使用 release tag 作为目录前缀
                   const key = '${{ github.event.release.tag_name }}/' + file;
                   const result = await uploadToQiniu(filePath, key);
-                  const publicUrl = \`https://\${domain}/\${key}\`;
+                  const publicUrl = \`https://\${process.env.QINIU_DOMAIN}/\${key}\`;
                   uploadResults.push({ file, key, url: publicUrl });
                   console.log('✅', file, '→', publicUrl);
                 } catch (error) {
