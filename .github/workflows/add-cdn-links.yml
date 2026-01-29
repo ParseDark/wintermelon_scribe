@@ -8,7 +8,7 @@ jobs:
   add-cdn-links:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
 
     steps:
       - name: Generate and Add CDN Links
@@ -23,38 +23,39 @@ jobs:
           REPO_SHORT_NAME=${REPO_NAME#*/}
 
           # 构建七牛云链接内容
-          CDN_CONTENT="
-
-          ## 🚀 CDN 加速下载
-
-          > 💡 以下链接通过七牛云 CDN 加速，国内访问速度更快
-
-          ### 📦 源代码
-          - [${REPO_SHORT_NAME}-${RELEASE_TAG}.zip](https://${QINIU_DOMAIN}/github-release/${REPO_OWNER}/${REPO_SHORT_NAME}/refs/tags/${RELEASE_TAG}/${REPO_SHORT_NAME}-${RELEASE_TAG}.zip)
-          - [${REPO_SHORT_NAME}-${RELEASE_TAG}.tar.gz](https://${QINIU_DOMAIN}/github-release/${REPO_OWNER}/${REPO_SHORT_NAME}/refs/tags/${RELEASE_TAG}/${REPO_SHORT_NAME}-${RELEASE_TAG}.tar.gz)"
+          echo "## 🚀 CDN 加速下载" > cdn-links.md
+          echo "" >> cdn-links.md
+          echo "> 💡 以下链接通过七牛云 CDN 加速，国内访问速度更快" >> cdn-links.md
+          echo "" >> cdn-links.md
+          echo "### 📦 源代码" >> cdn-links.md
+          echo "- [${REPO_SHORT_NAME}-${RELEASE_TAG}.zip](https://${QINIU_DOMAIN}/github-release/${REPO_OWNER}/${REPO_SHORT_NAME}/refs/tags/${RELEASE_TAG}/${REPO_SHORT_NAME}-${RELEASE_TAG}.zip)" >> cdn-links.md
+          echo "- [${REPO_SHORT_NAME}-${RELEASE_TAG}.tar.gz](https://${QINIU_DOMAIN}/github-release/${REPO_OWNER}/${REPO_SHORT_NAME}/refs/tags/${RELEASE_TAG}/${REPO_SHORT_NAME}-${RELEASE_TAG}.tar.gz)" >> cdn-links.md
 
           # 获取所有 assets 并转换成 CDN 链接
-          ASSETS_JSON='${{ toJson(github.event.release.assets) }}'
-          if [ "$ASSETS_JSON" != "[]" ]; then
-            CDN_CONTENT="$CDN_CONTENT
-
-          ### 📱 附件下载"
-            echo "$ASSETS_JSON" | jq -r '.[] | "- [\(.name)](https://'${QINIU_DOMAIN}'/github-release-assets/'${REPO_OWNER}'/'${REPO_SHORT_NAME}'/releases/download/'${RELEASE_TAG}'/\(.name))"' | while read -r line; do
-              CDN_CONTENT="$CDN_CONTENT
-          $line"
-            done
+          ASSET_COUNT=$(echo '${{ github.event.release.assets }}' | jq '. | length')
+          if [ "$ASSET_COUNT" -gt 0 ]; then
+            echo "" >> cdn-links.md
+            echo "### 📱 附件下载" >> cdn-links.md
+            echo "${{ github.event.release.assets }}" | jq -r '.[] | "- [\(.name)](https://'${QINIU_DOMAIN}'/github-release-assets/'${REPO_OWNER}'/'${REPO_SHORT_NAME}'/releases/download/'${RELEASE_TAG}'/\(.name))"' >> cdn-links.md
           fi
 
-          # 获取原始 Release 内容并添加 CDN 链接
-          ORIGINAL_BODY='${{ github.event.release.body }}'
-          FINAL_BODY="${ORIGINAL_BODY}${CDN_CONTENT}
+          # 合并原始内容和 CDN 链接
+          echo '${{ github.event.release.body }}' > release-temp.md
+          echo "" >> release-temp.md
+          cat cdn-links.md >> release-temp.md
+          echo "" >> release-temp.md
+          echo "---" >> release-temp.md
+          echo "" >> release-temp.md
+          echo "*七牛云 CDN 加速由 [${QINIU_DOMAIN}](${QINIU_DOMAIN}) 提供*" >> release-temp.md
 
-          ---
+          # 使用 API 更新 Release
+          API_URL="https://api.github.com/repos/${{ github.repository }}/releases/${{ github.event.release.id }}"
 
-          *七牛云 CDN 加速由 [${QINIU_DOMAIN}](${QINIU_DOMAIN}) 提供*"
-
-          # 更新 Release
-          echo "$FINAL_BODY" | gh release edit ${{ github.event.release.id }} --notes-file -
+          curl -X PATCH \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d "{\"body\":$(cat release-temp.md | jq -Rs .)}" \
+            "$API_URL"
 
           echo "✅ 已在 Release 中添加 CDN 下载链接"
 
