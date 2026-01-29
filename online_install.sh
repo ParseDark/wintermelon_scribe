@@ -45,10 +45,10 @@ echo -e "${BLUE}📂 解压中...${NC}"
 unzip -q archive.zip || { echo -e "${RED}解压失败${NC}"; exit 1; }
 
 # 安装
-if [ -d "$PROJECT_NAME/install.sh" ]; then
+if [ -f "$PROJECT_NAME/install.sh" ]; then
     cd "$PROJECT_NAME"
     chmod +x install.sh
-    echo -e "${BLUE}⚙ 安装中...${NC}"
+    echo -e "${BLUE}⚙️ 安装中...${NC}"
     ./install.sh || { echo -e "${RED}安装失败${NC}"; exit 1; }
  else
     echo -e "${RED}安装文件损坏${NC}"
