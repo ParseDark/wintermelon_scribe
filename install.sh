@@ -4,9 +4,8 @@
 
 set -e
 
-# 项目路径
-PROJECT_DIR="$(dirname "$0")"
-PROJECT_DIR="$(cd "$PROJECT_DIR" && pwd)"
+# 项目路径 - 获取脚本的绝对路径
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVICE_NAME="com.wintermelon.scribe"
 
 # 颜色定义
@@ -54,6 +53,8 @@ else
     echo -e "${BLUE}📚 安装依赖...${NC}"
     pip install -q -r "$PROJECT_DIR/requirements.txt"
 fi
+
+python env_config.py
 
 # 创建日志目录
 mkdir -p "$PROJECT_DIR/logs"
