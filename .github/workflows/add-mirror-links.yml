@@ -32,11 +32,8 @@ jobs:
           ## 🔥 国内加速下载
 
           ### 📦 源代码包
-          - [${REPO_SHORT_NAME}-${RELEASE_TAG}.zip](https://download.fastgit.org/${{ github.repository }}/archive/refs/tags/${RELEASE_TAG}/${REPO_SHORT_NAME}-${RELEASE_TAG}.zip) *(FastGit)*
-          - [${REPO_SHORT_NAME}-${RELEASE_TAG}.tar.gz](https://download.fastgit.org/${{ github.repository }}/archive/refs/tags/${RELEASE_TAG}/${REPO_SHORT_NAME}-${RELEASE_TAG}.tar.gz) *(FastGit)*
-
-          - [${REPO_SHORT_NAME}-${RELEASE_TAG}.zip](https://ghproxy.com/${{ github.repository }}/archive/refs/tags/${RELEASE_TAG}/${REPO_SHORT_NAME}-${RELEASE_TAG}.zip) *(备用链接)*
-          - [${REPO_SHORT_NAME}-${RELEASE_TAG}.tar.gz](https://ghproxy.com/${{ github.repository }}/archive/refs/tags/${RELEASE_TAG}/${REPO_SHORT_NAME}-${RELEASE_TAG}.tar.gz) *(备用链接)*"
+          - [${REPO_SHORT_NAME}-${RELEASE_TAG}.zip](https://ghfast.top/https://github.com/${{ github.repository }}/archive/refs/tags/${RELEASE_TAG}/${REPO_SHORT_NAME}-${RELEASE_TAG}.zip)
+          - [${REPO_SHORT_NAME}-${RELEASE_TAG}.tar.gz](https://ghfast.top/https://github.com/${{ github.repository }}/archive/refs/tags/${RELEASE_TAG}/${REPO_SHORT_NAME}-${RELEASE_TAG}.tar.gz)"
 
           # 添加 Release Assets（如果有）
           ASSET_COUNT=$(echo "$RELEASE_RESPONSE" | jq '.assets | length // 0')
@@ -46,20 +43,12 @@ jobs:
           ### 📱 编译文件
 
           "
-            # FastGit 镜像
-            echo "$RELEASE_RESPONSE" | jq -r '.assets[] | "- [\(.name)](https://download.fastgit.org/'${REPO_NAME}'/releases/download/'${RELEASE_TAG}'/\(.name)) *(FastGit)*"' >> mirror-links.txt
-            # GHProxy 备用
-            echo "$RELEASE_RESPONSE" | jq -r '.assets[] | "- [\(.name)](https://ghproxy.com/'${REPO_NAME}'/releases/download/'${RELEASE_TAG}'/\(.name)) *(备用链接)*"' >> mirror-links.txt
+            # GHFast 镜像
+            echo "$RELEASE_RESPONSE" | jq -r '.assets[] | "- [\(.name)](https://ghfast.top/https://github.com/'${REPO_NAME}'/releases/download/'${RELEASE_TAG}'/\(.name))"' >> mirror-links.txt
 
             MIRROR_CONTENT="$MIRROR_CONTENT$(cat mirror-links.txt)"
             rm -f mirror-links.txt
           fi
-
-          # 添加说明
-          MIRROR_CONTENT="$MIRROR_CONTENT
-
-          ---
-          > 💡 **提示**：以上为免费加速镜像，如无法使用请访问 [GitHub](https://github.com/${{ github.repository }}/releases)"
 
           # 更新 Release
           FINAL_BODY="${{ github.event.release.body }}${MIRROR_CONTENT}"
@@ -76,8 +65,7 @@ jobs:
         run: |
           echo "# ✨ 镜像链接已添加" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🔗 使用了以下免费镜像站：" >> $GITHUB_STEP_SUMMARY
-          echo "- **FastGit** - 最快的 GitHub 镜像" >> $GITHUB_STEP_SUMMARY
-          echo "- **GHProxy** - 通用反向代理" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 使用了 GHFast 镜像站：" >> $GITHUB_STEP_SUMMARY
+          echo "  https://ghfast.top" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "用户现在可以享受国内加速下载！" >> $GITHUB_STEP_SUMMARY
