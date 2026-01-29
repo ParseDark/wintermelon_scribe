@@ -11,8 +11,17 @@ from dotenv import load_dotenv
 from speech_transcription import create_transcription_manager
 from llm_processor import LLMProcessor
 import sys
+import logging
 
 load_dotenv()
+
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger('WinterMelonScribe')
 
 # 支持的提供商配置
 PROVIDER = os.getenv("TRANSCRIPTION_PROVIDER", "siliconflow").lower()
@@ -21,13 +30,16 @@ if PROVIDER == "groq":
     API_TOKEN = os.getenv("GROQ_API_KEY")
     MODEL = os.getenv("GROQ_MODEL", "whisper-large-v3-turbo")
     transcription_manager = create_transcription_manager("groq", api_key=API_TOKEN, model=MODEL)
+    logger.info(f"使用 Groq 提供商，模型: {MODEL}")
 
 else:  # 默认使用 siliconflow
     API_TOKEN = os.getenv("SILICONFLOW_API_KEY")
     MODEL = os.getenv("SILICONFLOW_MODEL", "FunAudioLLM/SenseVoiceSmall")
     transcription_manager = create_transcription_manager("siliconflow", api_key=API_TOKEN, model=MODEL)
+    logger.info(f"使用 SiliconFlow 提供商，模型: {MODEL}")
 
 SAMPLE_RATE = int(os.getenv("AUDIO_SAMPLE_RATE", "16000"))
+logger.info(f"音频采样率: {SAMPLE_RATE}Hz")
 
 recording = False
 audio_frames = []
@@ -483,15 +495,21 @@ def main():
         sound = "Pop" if notification_sound_enabled else None
         show_notification("冬瓜速记已启动", "按 Ctrl+/ 开始录音", "准备就绪", sound)
 
+    logger.info("程序启动成功，等待按键事件...")
+
     try:
         while True:
             time.sleep(0.1)
     except KeyboardInterrupt:
-        pass
+        logger.info("收到中断信号，正在退出...")
+    except Exception as e:
+        logger.error(f"程序异常: {e}", exc_info=True)
     finally:
+        logger.info("正在清理资源...")
         listener.stop()
         if recording:
             stop_recording()
+        logger.info("程序已退出")
         print("\n👋 已退出")
 
 

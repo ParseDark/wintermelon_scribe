@@ -24,11 +24,34 @@ pip install -r requirements.txt
 
 ## 🚀 Quick Start
 
+### Method 1: Direct Run (Recommended for Testing)
+
 ```bash
 # Activate virtual environment and run
 source .venv/bin/activate
 python main.py
 ```
+
+### Method 2: Background Service (Recommended for Daily Use) ⭐
+
+Run WinterMelon Scribe as a background service with auto-start at boot:
+
+```bash
+# One-click install as background service
+./install.sh
+```
+
+After installation, it will:
+- 🔋 Auto-start at boot
+- 🤫 Run silently in background
+- 🚫 No terminal window needed
+- ⌨️ Hotkeys and notifications work normally
+- 🎙️ Process name shows as "WinterMelon Scribe"
+
+Check status: `./status.sh`
+Uninstall service: `./uninstall.sh`
+
+For detailed instructions: [LAUNCH_AGENT.md](LAUNCH_AGENT.md)
 
 ## 🔧 macOS Permission Settings
 

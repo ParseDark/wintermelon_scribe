@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.wintermelon.scribe</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>__PROJECT_DIR__/.venv/bin/python3</string>
+        <string>__PROJECT_DIR__/wintermelon_scribe.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>__PROJECT_DIR__</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>__PROJECT_DIR__/logs/wintermelon_scribe.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>__PROJECT_DIR__/logs/wintermelon_scribe.err</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:__PROJECT_DIR__/.venv/bin</string>
+        <key>PYTHONPATH</key>
+        <string>__PROJECT_DIR__</string>
+    </dict>
+
+    <key>ProcessType</key>
+    <string>Interactive</string>
+
+    <key>LaunchOnlyOnce</key>
+    <false/>
+
+    <key>StartInterval</key>
+    <integer>0</integer>
+
+    <!-- 设置进程名称 -->
+    <key>Label</key>
+    <string>com.wintermelon.scribe</string>
+
+    <!-- 允许访听键盘事件 -->
+    <key>LaunchD</key>
+    <dict>
+        <key>IOSurface</key>
+        <true/>
+    </dict>
+</dict>
+</plist>

@@ -4,3 +4,4 @@ venv
 *.wav
 temp_*
 __pycache__
+logs

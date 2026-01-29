@@ -24,11 +24,34 @@ pip install -r requirements.txt
 
 ## 🚀 快速开始
 
+### 方式一：直接运行（推荐用于测试）
+
 ```bash
 # 激活虚拟环境并运行
 source .venv/bin/activate
 python main.py
 ```
+
+### 方式二：后台运行（推荐用于日常使用）⭐
+
+让冬瓜速记在后台自动运行，开机自启：
+
+```bash
+# 一键安装为后台服务
+./install.sh
+```
+
+安装后将：
+- 🔋 开机自动启动
+- 🤫 后台静默运行
+- 🚫 无需打开终端
+- ⌨️ 快捷键和通知正常工作
+- 🎙️ 进程名称显示为 "WinterMelon Scribe"
+
+查看状态：`./status.sh`
+卸载服务：`./uninstall.sh`
+
+详细说明：[LAUNCH_AGENT.md](LAUNCH_AGENT.md)
 
 ## 🔧 macOS 权限设置
 
