@@ -5,3 +5,4 @@ venv
 temp_*
 __pycache__
 logs
+.claude
